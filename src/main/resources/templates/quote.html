@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote</title>
+</head>
+<body>
+    <a th:href="@{/mover}">Top movers</a>
+    <a th:href="@{/portfolio}" > My Portfolio</a>
+    <a th:href="@{/watchlist}" > My Watchlist</a>
+    <h3> Search </h3>
+    <form th:action="@{/quote}">
+    <input type="text" name="ticker"/>
+    <input type="submit" value="GET QUOTE" placeholder="Pls enter ticker"/>
+    </form>
+
+    <h2 th:text="${Quote.symbol}"></h2>
+    <h3 th:text="${Quote.description}"></h3>
+    <hr>
+    <p>
+        <span th:text="${'Last Price: ' + Quote.lastPrice}"/>
+        <br>
+        <span th:text="${'total Volume: ' + Quote.totalVolume}"/>
+        <br>
+        <span th:text="${'52 week High: ' + Quote.yearHigh}"/>
+        <br>
+        <span th:text="${'52 week Low: ' + Quote.yearLow}"/>
+        <br>
+        <span th:text="${'PE ratio: ' + Quote.peRatio}"/>
+    </p>
+</body>
+</html>
