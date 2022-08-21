@@ -5,6 +5,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Watchlist </title>
+    <style>
+        #watchlisttable td, #watchlisttable th 
+        {   border: 1px solid #ddd;
+            padding: 4px;               }
+
+        #watchlisttable tr:nth-child(even){background-color: #f2f2f2;}
+
+        #watchlisttable th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #04AA6D;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <a th:href="@{/}">Get Quote</a>
@@ -12,18 +27,42 @@
     <a th:href="@{/movers}">Top movers</a>
     <h2> My watchlist </h2>
     <form th:action="@{/watchlist}">
-        <h4>Retrieve Portfolio</h4>
-        <input type="text" name="User"/>
-        <input type="submit" value="GET PORTFOLIO"/>
+        <h4>Retrieve WatchList</h4>
+        <input type="text" th:field="${Watchlist.username}" placeholder="Enter username" required/>
+        <input type="submit" value="GET WATCHLISTS"/>
     </form>
     <hr>
-    <table>
+    <div id="username">
+        <h3  th:text="${Watchlist.username!=null} ? 
+        ${'Displaying ' + Watchlist.username + ' watchlist ... ...'}"></h3>
+        <h4 th:if="${Watchlist.watchList==null}"> No items added </h4>
+    </div>
+    <form th:action="@{/addToWatch}">
+        <input type="text" th:field="${Watchlist.ticker}" placeholder="Pls enter ticker" required/>
+        <input type="submit" value="ADD TICKER"/>
+    </form>
+    <div id="msg">
+        <h3 th:text="${Watchlist.ErrorMsg}"></h3>
+    </div>
+    <table id="watchlisttable" style="border: 1px solid black;" th:if="${Watchlist.watchList != null}">
         <tr>
-            <td> ticker/description </td>
-            <td> Entry date </td>
-            <td> Purchase price </td>
-            <td> Quantity </td>
-            <td> P/L </td>
+            <th> ticker/description </th>
+            <th> </th>
+            <th> Last done </th>
+            <th> Volume </th>
+            <th> 52 week High </th>
+            <th> 52 week Low </th>
+        </tr>
+        <tr th:each="Quote:${Watchlist.quotes}">
+            <td>
+            <p><span th:text="${Quote.symbol}"></span></p>
+            <p><h5 th:text="${Quote.description}"></h5></p>
+            </td>
+            <td><a th:href="@{'/remove/' + ${Quote.symbol}}" >REMOVE</a>  </td>     
+            <td th:text="${Quote.lastPrice}"></td>
+            <td th:text="${Quote.totalVolume}"></td>
+            <td th:text="${Quote.yearHigh}"></td>
+            <td th:text="${Quote.yearLow}"></td>
         </tr>
     </table>
 </body>

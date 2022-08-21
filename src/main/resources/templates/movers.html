@@ -5,9 +5,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Top Movers</title>
+    <style>
+    #movertable td, #movertable th 
+    {   border: 1px solid #ddd;
+        padding: 4px;               }
+
+    #movertable tr:nth-child(even){background-color: #f2f2f2;}
+
+    #movertable th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        text-align: left;
+        background-color: #04AA6D;
+        color: white;
+    }
+    </style>
 </head>
 <body>
-    <a th:href="@{/quote}">Get quotes</a>
+    <a th:href="@{/}">Get quotes</a>
     <a th:href="@{/portfolio}">My portfolio</a>
     <a th:href="@{/watchlist}">My watchlist</a>
 
@@ -15,31 +30,30 @@
     <br>
     <hr>
     <h2> S&P 500 </h2>
-
-    <table>
+    <h4> SnP Gainers </h4>
+    <table id="movertable">
         <tr>
-            <td> <h3> Ticker </h3></td>
-            <td> <h3> Description </h3></td>
-            <td> <h3> % Change </h3> </td>
-            <td> <h3> Last Done </h3> </td>
-        </tr>
-        <tr>
-            <td> <h4> SnP Gainers <br></h4></td>
+            <th> <h3> Ticker </h3></th>
+            <th> <h3> Description </h3></th>
+            <th> <h3> % Change </h3> </th>
+            <th> <h3> Last Done </h3> </th>
         </tr>
         <tr th:each="mover: ${MoverList}">
             <td th:text="${mover.symbol}"> </td>
             <td th:text="${mover.description}"> </td>
             <td th:text="${mover.change}"> </td>
-            <td th:text="${mover.last}"> </td> 
+            <td th:text="'$'+ ${mover.last}"> </td> 
         </tr>
-        <tr>
-            <td> <br><h4> SnP Losers </h4>   </td>
-        </tr>
+    </table>
+    <h4> SnP Losers </h4>
+    <table id="movertable">
+
         <tr th:each="mover: ${SnPLoserList}">
             <td th:text="${mover.symbol}"> </td>
             <td th:text="${mover.description}"> </td>
             <td th:text="${mover.change}"> </td>
-            <td th:text="${mover.last}"> </td> 
+            <td th:text="'$' + ${mover.last}"> </td> 
+        </tr>
     </table>
 
 

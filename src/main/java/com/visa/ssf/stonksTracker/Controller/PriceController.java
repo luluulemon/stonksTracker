@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.visa.ssf.stonksTracker.Model.Mover;
 import com.visa.ssf.stonksTracker.Model.Quote;
+import com.visa.ssf.stonksTracker.Service.RedisService;
 import com.visa.ssf.stonksTracker.Service.StonkService;
 
 @Controller
@@ -25,13 +26,16 @@ public class PriceController {
     private static final Logger logger = LoggerFactory.getLogger(PriceController.class);
 
     @Autowired
-    StonkService stonkservice;
+    StonkService stonkService;
+
+    @Autowired
+    RedisService redisService;
 
     @GetMapping(path="/movers")
     public String Movers(Model model){
         
-        String SnPGainersArray = stonkservice.getTopMovers("up");
-        String SnPLosersArray = stonkservice.getTopMovers("down");
+        String SnPGainersArray = stonkService.getTopMovers("up");
+        String SnPLosersArray = stonkService.getTopMovers("down");
 
         ObjectMapper mapper = new ObjectMapper();
         try
@@ -57,37 +61,19 @@ public class PriceController {
     @GetMapping("/quote")
     public String Quote(@RequestParam String ticker, Model model){
 
-        logger.info("Check Param ticker" + ticker);
-        Optional<String> opQuoteJson = stonkservice.getQuote(ticker.toUpperCase());
-        if (!opQuoteJson.isPresent())
+        logger.info("Check Param ticker >>> " + ticker);
+        Optional<Quote> opQuote = stonkService.getQuote(ticker.toUpperCase());
+        if (!opQuote.isPresent())
         {   Quote quote = new Quote();
             quote.setDescription("Ticker is Unavailable");
             model.addAttribute("Quote", quote);
             return "quote";                                                 }   
 
+        model.addAttribute("Quote", opQuote.get());
 
-        ObjectMapper mapper = new ObjectMapper();
-        try{
-        Quote quote = mapper.readValue(opQuoteJson.get(), Quote.class);
-        model.addAttribute("Quote", quote);
-
-        logger.info("check mapper obj" + quote.getSymbol());
-        }
-        catch(JsonMappingException e){  logger.info(e.getMessage());    }
-        catch(JsonProcessingException e){  logger.info(e.getMessage());    }      
+        logger.info("check mapper obj" + opQuote.get().getSymbol());    
 
         return "quote";
-    }
-
-    @GetMapping("/portfolio")
-    public String portfolio(){
-        return "portfolio";
-    }
-
-
-    @GetMapping("/watchlist")
-    public String watchlist(){
-        return "watchlist";
     }
 
 }

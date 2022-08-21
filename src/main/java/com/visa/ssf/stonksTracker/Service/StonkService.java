@@ -3,6 +3,8 @@ package com.visa.ssf.stonksTracker.Service;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -20,6 +22,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.apptastic.tickersymbol.TickerSymbolSearch;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.visa.ssf.stonksTracker.Model.Quote;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -73,7 +78,7 @@ public class StonkService {
     }
 
 
-    public Optional<String> getQuote(String ticker){
+    public Optional<Quote> getQuote(String ticker){
         String endPoint1 = "https://api.tdameritrade.com/v1/marketdata/quotes";
         String url = UriComponentsBuilder.fromUriString(endPoint1)
         .queryParam("symbol", ticker)
@@ -83,7 +88,8 @@ public class StonkService {
         RestTemplate template = new RestTemplate();
         ResponseEntity<String> resp = template.getForEntity(url, String.class);
         
-        try (InputStream is = new ByteArrayInputStream(resp.getBody().getBytes())) {
+        try (InputStream is = new ByteArrayInputStream(resp.getBody().getBytes())) 
+        {
             JsonReader reader = Json.createReader(is);
             JsonObject data = reader.readObject();
             JsonObject quotedata = data.getJsonObject(ticker);
@@ -91,11 +97,57 @@ public class StonkService {
                 {   return Optional.empty();    }
             logger.info("Check data " + quotedata.toString());
             if(quotedata!= null)
-            {    return Optional.of(quotedata.toString());  }
-            }
+            {   ObjectMapper mapper = new ObjectMapper();
+                Quote quote = mapper.readValue(quotedata.toString(), Quote.class);
+                return Optional.of(quote);  }
+        }
         catch(IOException e)
-        {   logger.info("Error in service getQuote >>>>>"  + e.getMessage());       }           
+        {   logger.info("IOError in service getQuote >>>>>"  + e.getMessage());       }           
 
+        return Optional.empty();
+    }
+
+
+    public Optional<List<Quote>> getQuotesss(List<String> tickers){     // for multiple tickers
+        String endPoint1 = "https://api.tdameritrade.com/v1/marketdata/quotes";
+        
+        // Need to string tickers together
+        StringBuilder sb = new StringBuilder();
+        for(String ticker: tickers){
+            sb.append(ticker);
+            sb.append(",");
+        }
+        String allTickers = sb.toString();
+
+        String url = UriComponentsBuilder.fromUriString(endPoint1)
+        .queryParam("symbol", allTickers.substring(0, allTickers.length()-1))
+        .queryParam("apikey", ApiKey).toUriString(); 
+
+        RestTemplate template = new RestTemplate();
+        ResponseEntity<String> resp = template.getForEntity(url, String.class);
+        
+        List<Quote> quotes = new LinkedList<>();    // used to fill up with Quote objs
+        try (InputStream is = new ByteArrayInputStream(resp.getBody().getBytes())) 
+        {
+            JsonReader reader = Json.createReader(is);
+            JsonObject data = reader.readObject();
+
+            for(String ticker:tickers){
+            JsonObject quotedata = data.getJsonObject(ticker);
+            
+                if(quotedata == null)   // if endpoint does not work
+                {   return Optional.empty();    }
+
+            ObjectMapper mapper = new ObjectMapper();
+            Quote quote = mapper.readValue(quotedata.toString(), Quote.class);
+            quotes.add(quote);
+            }   
+
+            return Optional.of(quotes);
+        }
+        catch(IOException e)
+        {   logger.info("IOError in service getQuote >>>>>"  + e.getMessage());       } 
+          
         return Optional.empty();
     }
 

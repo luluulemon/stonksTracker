@@ -1,10 +1,18 @@
 package com.visa.ssf.stonksTracker.Model;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Quote {
+public class Quote implements Serializable{
+    
+    private String userName;
+    public String getUserName() {   return userName;    }
+    public void setUserName(String userName) {  this.userName = userName;   }
+
     private String ticker;
     private String description;
 
@@ -15,9 +23,9 @@ public class Quote {
     private Float openPrice;
     private Float highPrice;
     private Float lowPrice;
-    private Float closePrice;
     private Float netChange;
     private Float totalVolume;
+    public Float peRatio;
 
     @JsonProperty("52WkHigh")
     public Float yearHigh;
@@ -25,7 +33,6 @@ public class Quote {
     @JsonProperty("52WkLow")
     public Float yearLow;
 
-    public Float peRatio;
 
     public Float getLastPrice() {
         return lastPrice;
@@ -93,6 +100,57 @@ public class Quote {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    // some properties for portfolio
+    private int quantity;       
+    private Date entryDate;
+    private Float entryPrice;
+    private Date closeDate;
+    private Float closePrice;
+    private Float PnL;
+    private String comments;
+    private Boolean toClose;   
+
+    public Boolean getToClose() {   return toClose; }
+    public void setToClose(Boolean toClose) {   this.toClose = toClose; }
+
+    public int getQuantity() {
+        return quantity;
+    }
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+    public Date getEntryDate() {
+        return entryDate;
+    }
+    public void setEntryDate(Date entryDate) {
+        this.entryDate = entryDate;
+    }
+    public Float getEntryPrice() {
+        return entryPrice;
+    }
+    public void setEntryPrice(Float entryPrice) {
+        this.entryPrice = entryPrice;
+    }
+    public Date getCloseDate() {
+        return closeDate;
+    }
+    public void setCloseDate(Date closeDate) {
+        this.closeDate = closeDate;
+    }
+    public Float getPnL() {
+        return PnL;
+    }
+    public void setPnL(Float pnL) {
+        PnL = pnL;
+    }
+    public String getComments() {
+        return comments;
+    }
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
 
 }
 

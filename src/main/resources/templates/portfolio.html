@@ -5,6 +5,21 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portfolio</title>
+    <style>
+        #currentPortfolio td, #currentPortfolio th 
+        {   border: 1px solid #ddd;
+            padding: 8px;               }
+
+        #currentPortfolio tr:nth-child(even){background-color: #f2f2f2;}
+
+        #currentPortfolio th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #04AA6D;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <a th:href="@{/}">Get quotes</a>
@@ -13,18 +28,103 @@
     <h2> Portfolio Tracker </h2>
     <form th:action="@{/portfolio}">
         <h4>Retrieve Portfolio</h4>
-        <input type="text" name="User"/>
+        <input type="text" th:field="${Portfolio.username}" required/>
         <input type="submit" value="GET PORTFOLIO"/>
     </form>
     <hr>
-    <table>
+    <div id="usernameDisplay">
+        <h3 th:text="${Portfolio.username!= null} ? ${'Displaying ' + Portfolio.username + '... ...'}"></h3>
+    </div>
+    <h3> Add new Entry </h3>
+    <form th:action="@{/addToPortfolio}">
+        <input type="text" th:field="${Portfolio.ticker}" required placeholder="Pls Enter Ticker">
+        <input type="text" th:field="${Portfolio.entryPrice}" required placeholder="Enter Entry Price">
+        <input type="number" th:field="${Portfolio.quantity}" placeholder="Enter Quantity" required step="1">
+        <input type="date" th:field="${Portfolio.entryDate}" required>
+        <br>
+        <input type="text" th:field="${Portfolio.comments}" placeholder="Enter comments"/>
+        <input type="submit" value="ADD ENTRY"/>
+    </form>
+    <div id="msg">
+        <h3 th:text="${Portfolio.errorMsg}"></h3>   
+    </div>
+    <h4> Current Portfolio </h4>
+    <h4 th:if="${Portfolio.portfolio != null and #lists.size(Portfolio.portfolio) != 0}"> No Open Trade </h4>
+    <table id="currentPortfolio" th:if="${Portfolio.portfolio != null and #lists.size(Portfolio.portfolio) != 0}">
         <tr>
-            <td> ticker/description </td>
-            <td> Entry date </td>
-            <td> Purchase price </td>
-            <td> Quantity </td>
-            <td> P/L </td>
+            <th> </th>
+            <th> Ticker/Description </th>
+            <th> P/L </th>
+            <th> Last </th>
+            <th> Entry date </th>
+            <th> Purchase price </th>
+            <th> Quantity </th>
+            <th> Comments </th>
+
+        </tr >
+        <tr th:each="trade, status:${Portfolio.portfolio}">
+            <td> 
+                <a th:href="@{'/removePortfolio/' + ${status.index}}"> REMOVE </a>
+                <br> 
+                <a th:href="@{'/closePortfolio/' + ${status.index}}"> CLOSE </a>
+                <form th:if="${trade.toClose == true}" th:action="@{'/addToTransactions/' + ${status.index}}">
+                    <br><hr>
+                    <label for="cp">Close Price: </label>
+                    <input id="cp" type="text" th:field="${Portfolio.closePrice}" placeholder="Enter close Price" required/>
+                    <br>
+                    <label >Close Date: </label>
+                    <input type="date" th:field="${Portfolio.closeDate}" required/>
+                    <br>
+                    <input type="submit" value="CLOSE"/>
+                </form>
+                <a th:if="${trade.toClose==true}" th:href="@{'/cancelClosePortfolio/' + ${status.index}}"> CANCEL </a>
+                </form>
+            </td>
+            <td>
+            <p><span th:text="${trade.symbol}"></span></p>
+            <h5 th:text="${trade.description}"></h5>
+            </td>
+            <td> <span th:text="${trade.PnL}"></span> </td>
+            <td> <span th:text="${trade.lastPrice}"></span> </td> 
+            <td><h5 th:text="${trade.entryDate}"></h5></td>
+            <td><h5 th:text="${trade.entryPrice}"></h5></td>
+            <td><h4 th:text="${trade.quantity}"></h4></td>
+            <td><h5 th:text="${trade.comments}"></h5></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td> Total: </td>
+            <td><span th:text="${Portfolio.PnL}"></span></td>
         </tr>
     </table>
+    <br><hr>
+    <h4> Historical trades </h4>
+    <h4 th:if="${Portfolio.pastTransactions == null}"> No Past Trades </h4>
+    <table id="currentPortfolio" th:if="${Portfolio.pastTransactions != null}">
+        <tr>
+            <th> Ticker/Description </th>
+            <th> P/L </th>
+            <th> Entry Date </th>
+            <th> Purchase Price </th>
+            <th> Quantity </th>
+            <th> Close Date</th>
+            <th> Close Price</th>
+            <th> Comments </th>
+        </tr>
+        <tr th:each="pastTrade: ${Portfolio.pastTransactions}">
+            <td>
+                <p><span th:text="${pastTrade.symbol}"></span></p>
+                <h5 th:text="${pastTrade.description}"></h5>
+            </td>
+            <td> <span th:text="${pastTrade.PnL}"></span> </td>
+            <td><span th:text="${pastTrade.entryDate}"></span></td>
+            <td><span th:text="${pastTrade.entryPrice}"></span></td>
+            <td><span th:text="${pastTrade.quantity}"></span></td>
+            <td><span th:text="${pastTrade.closeDate}"></span></td>
+            <td><span th:text="${pastTrade.closePrice}"></span></td>
+            <td><span th:text="${pastTrade.comments}"></span></td>
+            <td> FOR REMOVE LINK </td>
+        </tr>
+    </table> 
 </body>
 </html>
