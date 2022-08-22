@@ -48,19 +48,25 @@
         <tr>
             <th> ticker/description </th>
             <th> </th>
-            <th> Last done </th>
-            <th> Volume </th>
+            <th> Last done/ Net Change </th>
+            <th> % change </th>
+            <th> Volume ('000) </th>
             <th> 52 week High </th>
             <th> 52 week Low </th>
         </tr>
         <tr th:each="Quote:${Watchlist.quotes}">
             <td>
             <p><span th:text="${Quote.symbol}"></span></p>
-            <p><h5 th:text="${Quote.description}"></h5></p>
+            <p><h5 style="margin-top:-15px; margin-bottom:0px;" th:text="${Quote.description}"></h5></p>
             </td>
             <td><a th:href="@{'/remove/' + ${Quote.symbol}}" >REMOVE</a>  </td>     
-            <td th:text="${Quote.lastPrice}"></td>
-            <td th:text="${Quote.totalVolume}"></td>
+            <td>
+                <p><span th:text="${Quote.lastPrice}"></span></p>
+                <h4 th:if="${Quote.netChange ge 0}" style="margin-top:-15px; color:green" th:text="${Quote.netChange}"></h4>
+                <h4 th:if="${Quote.netChange < 0}" style="margin-top:-15px; color:red" th:text="${Quote.netChange}"></h4>
+            </td>
+            <td><span th:text="${#numbers.formatDecimal(Quote.netChange/Quote.lastPrice*100,1,3) + '%'}"></span></td>
+            <td th:text="${#numbers.formatDecimal(Quote.totalVolume/1000,1,'COMMA',1,'DEFAULT')}"></td>
             <td th:text="${Quote.yearHigh}"></td>
             <td th:text="${Quote.yearLow}"></td>
         </tr>

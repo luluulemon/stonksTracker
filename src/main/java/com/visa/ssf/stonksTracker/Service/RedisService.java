@@ -139,15 +139,32 @@ public class RedisService {
             List<Quote> transactions = new LinkedList<>();
             transactions.add(newTransaction);
             redisPortfolio.setPastTransactions(transactions);
+            redisPortfolio.setPastTradePnL(newTransaction.getPnL());    // set total PnL
         }
         else
         {   List<Quote> transactions = redisPortfolio.getPastTransactions();
             transactions.add(newTransaction);
-            redisPortfolio.setPastTransactions(transactions);
+            Float pastTradePnL = 0f;
+            for(Quote trade:transactions)
+            {   pastTradePnL += trade.getPnL();     }
+            redisPortfolio.setPastTradePnL(pastTradePnL);       // set total PnL
+            redisPortfolio.setPastTransactions(transactions);   // set updated transactions
         }
         redistemplate.opsForValue().set(user, redisPortfolio);      // update redis with transaction & closed trade
 
         logger.info("Check user name returned " + redisPortfolio.getUsername());
         return redisPortfolio;
     }
+
+
+    public void removeTransaction(Portfolio portfolio){
+        // grab redisPortfolio -> update Transactions List n PnL
+        String user = portfolio.getUsername() + "miniProjectPortfolio";
+        Portfolio redisPortfolio = (Portfolio) redistemplate.opsForValue().get(user); 
+        redisPortfolio.setPastTransactions(portfolio.getPastTransactions());
+        redisPortfolio.setPastTradePnL(portfolio.getPastTradePnL());
+
+        redistemplate.opsForValue().set(user, redisPortfolio);
+    }
+    
 }

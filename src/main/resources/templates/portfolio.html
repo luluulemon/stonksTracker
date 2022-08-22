@@ -8,7 +8,8 @@
     <style>
         #currentPortfolio td, #currentPortfolio th 
         {   border: 1px solid #ddd;
-            padding: 8px;               }
+            padding: 5px;               
+            padding-bottom: 1px;    }
 
         #currentPortfolio tr:nth-child(even){background-color: #f2f2f2;}
 
@@ -49,7 +50,7 @@
         <h3 th:text="${Portfolio.errorMsg}"></h3>   
     </div>
     <h4> Current Portfolio </h4>
-    <h4 th:if="${Portfolio.portfolio != null and #lists.size(Portfolio.portfolio) != 0}"> No Open Trade </h4>
+    <h4 th:if="${Portfolio.portfolio == null or #lists.size(Portfolio.portfolio) == 0}"> No Open Trade </h4>
     <table id="currentPortfolio" th:if="${Portfolio.portfolio != null and #lists.size(Portfolio.portfolio) != 0}">
         <tr>
             <th> </th>
@@ -81,20 +82,20 @@
                 </form>
             </td>
             <td>
-            <p><span th:text="${trade.symbol}"></span></p>
-            <h5 th:text="${trade.description}"></h5>
+            <p><span style="margin:0px;" th:text="${trade.symbol}"></span></p>
+            <h5 style="margin-top:-15px; margin-bottom: 10px"  th:text="${trade.description}"></h5>
             </td>
-            <td> <span th:text="${trade.PnL}"></span> </td>
+            <td> <span th:text="${#numbers.formatDecimal(trade.PnL,1,'COMMA',2,'DEFAULT')}"></span> </td>
             <td> <span th:text="${trade.lastPrice}"></span> </td> 
-            <td><h5 th:text="${trade.entryDate}"></h5></td>
-            <td><h5 th:text="${trade.entryPrice}"></h5></td>
-            <td><h4 th:text="${trade.quantity}"></h4></td>
-            <td><h5 th:text="${trade.comments}"></h5></td>
+            <td><span th:text="${trade.entryDate}"></span></td>
+            <td><span th:text="${trade.entryPrice}"></span></td>
+            <td><span th:text="${trade.quantity}"></span></td>
+            <td><span th:text="${trade.comments}"></span></td>
         </tr>
         <tr>
             <td></td>
-            <td> Total: </td>
-            <td><span th:text="${Portfolio.PnL}"></span></td>
+            <td align="right"> Total: </td>
+            <td><span th:text="${#numbers.formatDecimal(Portfolio.PnL,1,'COMMA',2,'DEFAULT')}"></span></td>
         </tr>
     </table>
     <br><hr>
@@ -111,19 +112,23 @@
             <th> Close Price</th>
             <th> Comments </th>
         </tr>
-        <tr th:each="pastTrade: ${Portfolio.pastTransactions}">
+        <tr th:each="pastTrade, status: ${Portfolio.pastTransactions}">
             <td>
                 <p><span th:text="${pastTrade.symbol}"></span></p>
-                <h5 th:text="${pastTrade.description}"></h5>
+                <h5 style="margin-top:-15px;" th:text="${pastTrade.description}"></h5>
             </td>
-            <td> <span th:text="${pastTrade.PnL}"></span> </td>
+            <td> <span th:text="${#numbers.formatDecimal(pastTrade.PnL,1,'COMMA',2,'DEFAULT')}"></span> </td>
             <td><span th:text="${pastTrade.entryDate}"></span></td>
             <td><span th:text="${pastTrade.entryPrice}"></span></td>
             <td><span th:text="${pastTrade.quantity}"></span></td>
             <td><span th:text="${pastTrade.closeDate}"></span></td>
             <td><span th:text="${pastTrade.closePrice}"></span></td>
             <td><span th:text="${pastTrade.comments}"></span></td>
-            <td> FOR REMOVE LINK </td>
+            <td><a th:href="@{'/removeTransaction/' + ${status.index}}">REMOVE</a></td>
+        </tr>
+        <tr>
+            <td> <h4 align="right"> Total: </h4></td>
+            <td><span th:text="${#numbers.formatDecimal(Portfolio.pastTradePnL,1,'COMMA',2,'DEFAULT')}"></span></td>
         </tr>
     </table> 
 </body>

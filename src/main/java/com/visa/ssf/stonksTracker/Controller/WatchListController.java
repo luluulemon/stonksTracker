@@ -121,7 +121,7 @@ public class WatchListController {
 
     // About Portfolio Display from here 
     public List<Quote> currPortfolio; 
-    public List<Quote> currPastTrades;
+    public Portfolio currPortfolioObj;
 
     @GetMapping("/portfolio")
     public String portfolio(@ModelAttribute Portfolio portfolio, Model model){
@@ -137,7 +137,7 @@ public class WatchListController {
             portfolio = redisService.getPortfolio(portfolio);
         }
         currPortfolio = portfolio.getPortfolio();
-        currPastTrades = portfolio.getPastTransactions();
+        currPortfolioObj = portfolio;       // update Portfolio Obj (for transactions display)
 
         if(portfolio.getPortfolio() != null)
         {   Portfolio displayPortfolio = getDisplayPortfolio2(currPortfolio);
@@ -185,7 +185,8 @@ public class WatchListController {
             // only display name, errorMsg, portfolio (with PnL), transactions
         }
         returnPortfolio.setUsername(currUser);
-        returnPortfolio.setPastTransactions(currPastTrades);
+        returnPortfolio.setPastTransactions(currPortfolioObj.getPastTransactions());
+        returnPortfolio.setPastTradePnL(currPortfolioObj.getPastTradePnL());
         model.addAttribute("Portfolio", returnPortfolio);
            
         return "portfolio";
@@ -197,7 +198,8 @@ public class WatchListController {
 
         Portfolio portfolio = new Portfolio();
         portfolio.setUsername(currUser);
-        portfolio.setPastTransactions(currPastTrades);
+        portfolio.setPastTransactions(currPortfolioObj.getPastTransactions());
+        portfolio.setPastTradePnL(currPortfolioObj.getPastTradePnL());
         logger.info("Check removed quote >>> " + currPortfolio.get(index).getSymbol());
         currPortfolio.remove(index);        // updated currPortfolio
         portfolio.setPortfolio(currPortfolio);
@@ -220,9 +222,10 @@ public class WatchListController {
         logger.info("Check close item index >>>> " + index);
         Portfolio portfolio = new Portfolio();
         portfolio.setUsername(currUser);
-        portfolio.setPastTransactions(currPastTrades);
-        currPortfolio.get(index).setToClose(true);        // updated currPortfolio with close Boolean
-
+        portfolio.setPastTransactions(currPortfolioObj.getPastTransactions());
+        portfolio.setPastTradePnL(currPortfolioObj.getPastTradePnL());
+        currPortfolio.get(index).setToClose(true);  // updated currPortfolio with close Boolean
+                                                            // *no update to redis
         // Call quote service to get lastPrice;     
         Portfolio displayPortfolio = getDisplayPortfolio2(currPortfolio);
         portfolio.setPortfolio(displayPortfolio.getPortfolio());                       
@@ -238,8 +241,8 @@ public class WatchListController {
 
         Portfolio portfolio = new Portfolio();
         portfolio.setUsername(currUser);
-        portfolio.setPastTransactions(currPastTrades);
-        logger.info("Check transaction to close " + currPortfolio.get(index).getSymbol());
+        portfolio.setPastTransactions(currPortfolioObj.getPastTransactions());
+        portfolio.setPastTradePnL(currPortfolioObj.getPastTradePnL());
         currPortfolio.get(index).setToClose(false);       // updated currPortfolio with close Boolean
         portfolio.setPortfolio(currPortfolio);              // update for display                  
 
@@ -267,10 +270,8 @@ public class WatchListController {
         portfolio.setUsername(currUser);
         portfolio = redisService.addToTransaction(portfolio, index);    // send username/index(to remove)/closeDate/closePrice    
         currPortfolio = portfolio.getPortfolio();       // update CurrPortfolio
+        currPortfolioObj = portfolio;                   // update Portfolio (for transactions)
 
-        // Call quote service to get lastPrice;
-        // List<Quote> displayPortfolio = getDisplayPortfolio(currPortfolio);
-        // portfolio.setPortfolio(displayPortfolio);
         Portfolio displayPortfolio = getDisplayPortfolio2(currPortfolio);
         portfolio.setPortfolio(displayPortfolio.getPortfolio());                       
         portfolio.setPnL(displayPortfolio.getPnL()); 
@@ -280,19 +281,24 @@ public class WatchListController {
     }
 
 
-    public List<Quote> getDisplayPortfolio(List<Quote> currPortfolio){       // helper function to get Last Price for display
-        List<Quote> displayPortfolio = new LinkedList<>();
-        Float totalPnL = 0f;
-        for(Quote quote: currPortfolio){
-            Optional<Quote> opCurrQuote = stonkService.getQuote(quote.getSymbol());
-            quote.setLastPrice(opCurrQuote.get().getLastPrice());
-            Float PnL = quote.getQuantity() * (quote.getLastPrice() - quote.getEntryPrice());
-            quote.setPnL(PnL);
-            displayPortfolio.add(quote);
-            totalPnL += PnL;
+    @GetMapping("/removeTransaction/{index}")
+    public String removeTransactionItem(@PathVariable int index, Model model){
+        currPortfolioObj.getPastTransactions().remove(index);   // update currPortfolioObj with removed transaction
+        Float pastTradePnL = 0f;
+        for(Quote q:currPortfolioObj.getPastTransactions()){
+            pastTradePnL += q.getPnL();
         }
-        
-        return displayPortfolio;
+        currPortfolioObj.setPastTradePnL(pastTradePnL);         // update transactions PnL
+        currPortfolioObj.getPastTransactions().remove(index);   // update currPortfolioObj with removed transaction
+        logger.info("In remove transaction check username " + currPortfolioObj.getUsername());
+
+        redisService.removeTransaction(currPortfolioObj);
+
+        Portfolio displayPortfolio = getDisplayPortfolio2(currPortfolio);
+        currPortfolioObj.setPortfolio(displayPortfolio.getPortfolio());                       
+        currPortfolioObj.setPnL(displayPortfolio.getPnL()); 
+        model.addAttribute("Portfolio", currPortfolioObj);
+        return "portfolio";
     }
 
 

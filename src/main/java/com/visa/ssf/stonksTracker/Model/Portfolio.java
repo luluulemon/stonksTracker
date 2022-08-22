@@ -14,11 +14,19 @@ public class Portfolio implements Serializable {
     private Date closeDate;
     private Float closePrice;
     private Float PnL;
+    private Float pastTradePnL;
     private String comments;
     private String username;
     private String errorMsg;
     private List<Quote> portfolio;
     private List<Quote> pastTransactions;
+
+    public Float getPastTradePnL() {
+        return pastTradePnL;
+    }
+    public void setPastTradePnL(Float pastTradePnL) {
+        this.pastTradePnL = pastTradePnL;
+    }
 
     public List<Quote> getPastTransactions() {
         return pastTransactions;
