@@ -5,58 +5,108 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Top Movers</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css"/>
     <style>
     #movertable td, #movertable th 
     {   border: 1px solid #ddd;
         padding: 4px;               }
 
-    #movertable tr:nth-child(even){background-color: #f2f2f2;}
+    #movertable tr:nth-child(even){background-color: #1A4d2e;}
 
     #movertable th {
         padding-top: 12px;
         padding-bottom: 12px;
         text-align: left;
-        background-color: #04AA6D;
-        color: white;
     }
     </style>
 </head>
 <body>
-    <a th:href="@{/}">Get quotes</a>
-    <a th:href="@{/portfolio}">My portfolio</a>
-    <a th:href="@{/watchlist}">My watchlist</a>
+    <nav class="navbar navbar-expand-lg bg-light fixed-top">
+        <div class="container-fluid">
+             <a href=# class="navbar-brand"> Stonks hub </a>
+             <button 
+                class="navbar-toggler" 
+                type="button"
+                data-bs-toggle="collapse" 
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav" 
+                aria-expanded="false"
+                aria-label="Toggle Navigation">
+                <span class="navbar-toggler-icon"></span>
+             </button>
+             <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/}">Get quotes</a></li>
+                    <li><a class="nav-link active" aria-current="page" th:href="@{/movers}">Top movers</a></li>
+                    <li><a class="nav-link" th:href="@{/portfolio}">My portfolio</a></li>
+                    <li><a class="nav-link" th:href="@{/watchlist}">My watchlist</a></li>
+                </ul>
+             </div>
+        </div>
+    </nav>
+    <div class="container-fluid" style="background-color: black; color:#FAF3E3;">
+        <div class="row mt-5">
+            <div class="col mt-3">
+                <h1> Top Movers </h1>
+                <form>
+                    <select onchange="this.form.submit()" th:field="${Indices.indices}">
+                        <option selected value="$SPX.X">S&P 500</option>
+                        <option value="$COMPX">Nasdaq</option>
+                        <option value="$DJI">Dow Jones</option>
+                    </select>
+                </form>
+                <hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h4> SnP Gainers </h4>
+                <table id="movertable">
+                    <tr>
+                        <th> <h4> Ticker </h4></th>
+                        <th> <h4> Description </h4></th>
+                        <th> <h4> % Change </h4> </th>
+                        <th> <h4> Last Done </h4> </th>
+                        <th><h4> Net Change </h4></th>
+                        <th><h4> Total Volume </h4></th>
+                    </tr>
+                    <tr th:each="mover: ${GainersList}">
+                        <td th:text="${mover.symbol}"> </td>
+                        <td th:text="${mover.description}"> </td>
+                        <td th:text="${#numbers.formatDecimal(mover.change*100,1,2) + '%'}"> </td>
+                        <td th:text="'$'+ ${mover.last}"> </td> 
+                        <td th:text="${#numbers.formatDecimal(mover.last*mover.change,1,2)}"></td>
+                        <td th:text="${#numbers.formatInteger(mover.totalVolume,1,'COMMA')}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h4> SnP Losers </h4>
+                <table id="movertable">
+                    <tr>
+                        <th> <h4> Ticker </h4></th>
+                        <th> <h4> Description </h4></th>
+                        <th> <h4> % Change </h4> </th>
+                        <th> <h4> Last Done </h4> </th>
+                        <th><h4> Net Change </h4></th>
+                        <th><h4> Total Volume </h4></th>
+                    </tr>
+            
+                    <tr th:each="mover: ${LosersList}">
+                        <td th:text="${mover.symbol}"> </td>
+                        <td th:text="${mover.description}"> </td>
+                        <td th:text="${#numbers.formatDecimal(mover.change*100,1,2) +'%'}"> </td>
+                        <td th:text="'$' + ${mover.last}"> </td> 
+                        <td th:text="${#numbers.formatDecimal(mover.last*mover.change,1,2)}"></td>
+                        <td th:text="${#numbers.formatInteger(mover.totalVolume,1,'COMMA')}"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
 
-    <h1> Top Movers </h1>
-    <br>
-    <hr>
-    <h2> S&P 500 </h2>
-    <h4> SnP Gainers </h4>
-    <table id="movertable">
-        <tr>
-            <th> <h3> Ticker </h3></th>
-            <th> <h3> Description </h3></th>
-            <th> <h3> % Change </h3> </th>
-            <th> <h3> Last Done </h3> </th>
-        </tr>
-        <tr th:each="mover: ${MoverList}">
-            <td th:text="${mover.symbol}"> </td>
-            <td th:text="${mover.description}"> </td>
-            <td th:text="${mover.change}"> </td>
-            <td th:text="'$'+ ${mover.last}"> </td> 
-        </tr>
-    </table>
-    <h4> SnP Losers </h4>
-    <table id="movertable">
-
-        <tr th:each="mover: ${SnPLoserList}">
-            <td th:text="${mover.symbol}"> </td>
-            <td th:text="${mover.description}"> </td>
-            <td th:text="${mover.change}"> </td>
-            <td th:text="'$' + ${mover.last}"> </td> 
-        </tr>
-    </table>
-
-
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

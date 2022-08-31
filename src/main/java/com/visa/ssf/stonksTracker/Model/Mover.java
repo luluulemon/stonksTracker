@@ -16,6 +16,15 @@ public class Mover {
      private Float last;
      private String direction;
      private Integer totalVolume;
+     private String indices;
+
+     public String getIndices() {
+         return indices;
+     }
+ 
+     public void setIndices(String indices) {
+         this.indices = indices;
+     }
      
     public Integer getTotalVolume() {
         return totalVolume;

@@ -109,7 +109,7 @@ public class Quote implements Serializable{
     private Float closePrice;
     private Float PnL;
     private String comments;
-    private Boolean toClose;   
+    private Boolean toClose=false;   
 
     public Boolean getToClose() {   return toClose; }
     public void setToClose(Boolean toClose) {   this.toClose = toClose; }

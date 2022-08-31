@@ -22,11 +22,11 @@ public class RedisService {
     RedisTemplate<String,Object> redistemplate;
 
     public Watchlist saveWatchList(String ticker, String userName){
-        
+
         String user = userName + "miniProjectWatchlist";
    
         Watchlist watchlist = (Watchlist) redistemplate.opsForValue().get(user);
-        List<String> tickerList = watchlist.getWatchList();   // grab current list;
+        List<String> tickerList = watchlist.getWatchList();   // grab current list (List of String Tickers);
 
         if (tickerList == null)       // if watchlist is null, create new list, add ticker to list
         {   List<String> watchlistStocks = new LinkedList<>();   
@@ -44,6 +44,15 @@ public class RedisService {
         // watchlist is returned with 1. username, 2. (List)updated watchlist
         return watchlist;       
     }
+
+    public void saveSortedWatchlist(String userName, List<String> currList){
+        String user = userName + "miniProjectWatchlist";
+        Watchlist watchlist = new Watchlist();
+        watchlist.setUsername(userName);
+        watchlist.setWatchList(currList);
+        redistemplate.opsForValue().set(user, watchlist);   
+    }       // save to redis with Username, and List of Ticker(String)
+
 
 
     public void removeSymbol(Watchlist watchlist){
@@ -104,21 +113,23 @@ public class RedisService {
             port.setPortfolio(tempPortfolio);
         }
         else
-        {   List<Quote> tempPortfolio = port.getPortfolio();    // else, add to exsiting list
-            tempPortfolio.add(quote);
-            port.setPortfolio(tempPortfolio);
-        }
+        {   port.getPortfolio().add(quote);    }     // else, add to exsiting list
+        
         redistemplate.opsForValue().set(user, port);   // save portfolio to redis with list
         return port;
     }
 
-    public Portfolio removePortfolioItem(Portfolio portfolio){
+    public void removePortfolioItem(Portfolio portfolio){
         String user = portfolio.getUsername() + "miniProjectPortfolio";
         Portfolio redisPortfolio = (Portfolio) redistemplate.opsForValue().get(user);
         redisPortfolio.setPortfolio(portfolio.getPortfolio());
         redistemplate.opsForValue().set(user, redisPortfolio);
 
-        return redisPortfolio;
+    }
+
+    public void editPortfolioItem(Portfolio portfolio){     // pass in updated portfolio
+        String user = portfolio.getUsername() + "miniProjectPortfolio";
+        redistemplate.opsForValue().set(user, portfolio);   
     }
 
     public Portfolio addToTransaction(Portfolio portfolio, int index){
@@ -133,16 +144,17 @@ public class RedisService {
         Float PnL = (newTransaction.getClosePrice() - newTransaction.getEntryPrice())
                     * newTransaction.getQuantity();
         newTransaction.setPnL(PnL);     
-        redisPortfolio.getPortfolio().remove(index);    // update closed trade
+        redisPortfolio.getPortfolio().remove(index);    // update closed trade, remove from portfolio
 
         if (redisPortfolio.getPastTransactions() == null){
-            List<Quote> transactions = new LinkedList<>();
+            List<Quote> transactions = new LinkedList<>();  // add new Transaction to new empty List
             transactions.add(newTransaction);
             redisPortfolio.setPastTransactions(transactions);
             redisPortfolio.setPastTradePnL(newTransaction.getPnL());    // set total PnL
         }
         else
-        {   List<Quote> transactions = redisPortfolio.getPastTransactions();
+        {    //redisPortfolio.getPastTransactions().add(newTransaction);
+            List<Quote> transactions = redisPortfolio.getPastTransactions();
             transactions.add(newTransaction);
             Float pastTradePnL = 0f;
             for(Quote trade:transactions)
@@ -152,12 +164,11 @@ public class RedisService {
         }
         redistemplate.opsForValue().set(user, redisPortfolio);      // update redis with transaction & closed trade
 
-        logger.info("Check user name returned " + redisPortfolio.getUsername());
         return redisPortfolio;
     }
 
 
-    public void removeTransaction(Portfolio portfolio){
+    public void removeAndEditTransaction(Portfolio portfolio){
         // grab redisPortfolio -> update Transactions List n PnL
         String user = portfolio.getUsername() + "miniProjectPortfolio";
         Portfolio redisPortfolio = (Portfolio) redistemplate.opsForValue().get(user); 

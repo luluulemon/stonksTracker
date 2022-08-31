@@ -1,6 +1,7 @@
 package com.visa.ssf.stonksTracker.Controller;
 
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,13 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.visa.ssf.stonksTracker.Model.Mover;
+import com.visa.ssf.stonksTracker.Model.Profile;
 import com.visa.ssf.stonksTracker.Model.Quote;
 import com.visa.ssf.stonksTracker.Service.RedisService;
 import com.visa.ssf.stonksTracker.Service.StonkService;
@@ -32,33 +31,31 @@ public class PriceController {
     RedisService redisService;
 
     @GetMapping(path="/movers")
-    public String Movers(Model model){
-        
-        String SnPGainersArray = stonkService.getTopMovers("up");
-        String SnPLosersArray = stonkService.getTopMovers("down");
+    public String Movers(Model model, @ModelAttribute Mover indices){
+        logger.info("In movers Controller, check indices dropdown >>>>> " + indices.getIndices());
+        if (indices.getIndices() == null){   indices.setIndices("$SPX.X"); }
 
-        ObjectMapper mapper = new ObjectMapper();
-        try
-        {
-            List<Mover> GainerList = mapper.readValue(SnPGainersArray, 
-                    new TypeReference<List<Mover>>(){});
-            model.addAttribute("MoverList", GainerList);
-
-            List<Mover> SnPLosersList = mapper.readValue(SnPLosersArray, 
-            new TypeReference<List<Mover>>(){});
-            model.addAttribute("SnPLoserList", SnPLosersList);
-
-            logger.info(GainerList.get(0).getDescription());
-            logger.info(SnPLosersList.get(0).getDescription());
-        }
-        catch(JsonMappingException e){  logger.info(e.getMessage());    }
-        catch(JsonProcessingException e){  logger.info(e.getMessage());    }
-
+        Optional<List<Mover>> gainersList = stonkService.getTopMovers("up", indices.getIndices());
+            if(gainersList.isPresent())
+            {   model.addAttribute("GainersList", gainersList.get());   }
+            else{
+                List<Mover> gainers = new LinkedList<>(); 
+                model.addAttribute("GainersList", gainers); } 
+        Optional<List<Mover>> losersList = stonkService.getTopMovers("down", indices.getIndices());
+            if(losersList.isPresent())
+            {   model.addAttribute("LosersList", losersList.get());   }
+            else{
+                List<Mover> losers = new LinkedList<>();
+                model.addAttribute("LosersList", losers);   }
+          
+        model.addAttribute("Indices", indices);
         return "movers";
     }
 
 
-    @GetMapping("/quote")
+    public static String currTicker;
+
+    @GetMapping(value={"/quote"})
     public String Quote(@RequestParam String ticker, Model model){
 
         logger.info("Check Param ticker >>> " + ticker);
@@ -67,11 +64,21 @@ public class PriceController {
         {   Quote quote = new Quote();
             quote.setDescription("Ticker is Unavailable");
             model.addAttribute("Quote", quote);
+            model.addAttribute("Profile", new Profile());
             return "quote";                                                 }   
 
         model.addAttribute("Quote", opQuote.get());
+        
+        // adding other API service
+        Optional<Profile> opProfile = stonkService.getProfile(ticker);
+        if (!opProfile.isPresent())
+        {   model.addAttribute("Profile", new Profile());
+           logger.info("returned empty Profile");                       }
 
-        logger.info("check mapper obj" + opQuote.get().getSymbol());    
+        model.addAttribute("Profile", opProfile.get());
+        currTicker = ticker.toUpperCase();
+
+        logger.info("check currTicker" + currTicker);    
 
         return "quote";
     }

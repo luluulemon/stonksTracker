@@ -1,16 +1,20 @@
 package com.visa.ssf.stonksTracker.Model;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 public class Portfolio implements Serializable {
     private String ticker;
     private String description;
     private Float lastPrice;
     private int quantity;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date entryDate;
     private Float entryPrice;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date closeDate;
     private Float closePrice;
     private Float PnL;
@@ -20,6 +24,15 @@ public class Portfolio implements Serializable {
     private String errorMsg;
     private List<Quote> portfolio;
     private List<Quote> pastTransactions;
+    private int editIndex = 88888;   // index show edit row in the midst of edit PORTFOLIO
+                                    // shows 100000+closeIndex in the midst of close PORTFOLIO
+
+    public int getEditIndex() {
+        return editIndex;
+    }
+    public void setEditIndex(int editIndex) {
+        this.editIndex = editIndex;
+    }
 
     public Float getPastTradePnL() {
         return pastTradePnL;
@@ -122,4 +135,49 @@ public class Portfolio implements Serializable {
         this.comments = comments;
     }
 
+    private int eQuantity;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date eEntryDate;
+    private Float eEntryPrice;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private Date eCloseDate;
+    private Float eClosePrice;
+    private String eComments;
+
+    public int geteQuantity() {
+        return eQuantity;
+    }
+    public void seteQuantity(int eQuantity) {
+        this.eQuantity = eQuantity;
+    }
+    public Date geteEntryDate() {
+        return eEntryDate;
+    }
+    public void seteEntryDate(Date eEntryDate) {
+        this.eEntryDate = eEntryDate;
+    }
+    public Float geteEntryPrice() {
+        return eEntryPrice;
+    }
+    public void seteEntryPrice(Float eEntryPrice) {
+        this.eEntryPrice = eEntryPrice;
+    }
+    public Date geteCloseDate() {
+        return eCloseDate;
+    }
+    public void seteCloseDate(Date eCloseDate) {
+        this.eCloseDate = eCloseDate;
+    }
+    public Float geteClosePrice() {
+        return eClosePrice;
+    }
+    public void seteClosePrice(Float eClosePrice) {
+        this.eClosePrice = eClosePrice;
+    }
+    public String geteComments() {
+        return eComments;
+    }
+    public void seteComments(String eComments) {
+        this.eComments = eComments;
+    }
 }
