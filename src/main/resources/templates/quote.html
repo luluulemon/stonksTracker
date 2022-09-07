@@ -10,7 +10,7 @@
 <body>
     <nav class="navbar navbar-expand-lg bg-light">
         <div class="container-fluid">
-             <a href=# class="navbar-brand"> Stonks hub </a>
+             <a th:href="@{/}" class="navbar-brand"> Stonkshub </a>
              <button 
                 class="navbar-toggler" 
                 type="button"
@@ -31,14 +31,14 @@
              </div>
         </div>
     </nav>  
-    <div class="container">
+    <div class="container-fluid" style="background-color:black; color:#faf3e3">
         <div class="row">
-            <h1>  StonksHub </h1>
+            <h1>  Ticker Search </h1>
         </div>
         <div class="row">
             <form th:action="@{/quote}">
-                <input type="text" name="ticker"/>
-                <input type="submit" value="GET QUOTE" placeholder="Pls enter ticker"/>
+                <input type="text" name="ticker" placeholder="Enter ticker"/>
+                <input style="background-color:#ff9f29" type="submit" value="GET QUOTE" />
             </form>
         </div>
         <div class="row">
@@ -46,49 +46,48 @@
                 <h3 th:text="${Quote.description}"></h3>   
             </div>
         </div>
-        <div class="row">
-            <table th:if="${Quote.symbol!=null}">
-                <tr>
-                    <td>
-                        <img th:src="${Profile.logo}" width=80 height=80/>
-                    </td>
-                    <td>
-                        <h2 th:text="${Quote.symbol}"></h2>
-                        <h4 style="margin-top:-15px; margin-right:10px;"  th:text="${Quote.description}"></h4>
-                    </td>
-                    <td>
-                        <h3 align="center" th:text="${Quote.lastPrice}"></h3>
-                        <h4 align="center" style="margin-top:-10px;" th:text="${Quote.netChange}"></h4>
-                    </td>
-                    <td>
-                        <a th:href="@{/addToWatch2}"> ADD TO WATCHLIST </a>
-                    </td>
-                </tr>     
-                <tr>
-                    <td colspan="2"><a th:href="@{${Profile.weburl}}"/><span th:text=${Profile.weburl}></span></td>
-                    <td><span th:text="${'Volume: ' + Quote.totalVolume}"/></td>
-                </tr>
-            </table>
-        </div>
-        <div class="row">
-            <hr>
-            <p th:if="${Quote.symbol!=null}"> 
-                <span th:text="${'Industry: ' + Profile.Industry}"/>
-                <br>
-                <span th:text="${'IPO Date: ' + Profile.ipoDate}"/>
-                <br>
-                <span th:text="${'Market Cap (m): ' + #numbers.formatDecimal(Profile.marketCapitalization,1,'COMMA',2,'DEFAULT')}"/>
-                <br>
-                <span th:text="${'Total Shares O/S (m): ' + Profile.shareOutstanding}"/>
-                <br>        
-                <span th:text="${'52 week High: ' + Quote.yearHigh}"/>
-                <br>
-                <span th:text="${'52 week Low: ' + Quote.yearLow}"/>
-                <br>
-                <span th:text="${'PE ratio: ' + #numbers.formatDecimal(Quote.peRatio,1,'COMMA',2,'DEFAULT') }"/>
-            </p>
-        </div>
+        <div class="row" th:if="${Quote.symbol!=null}">
+            <div class="card m-5" style="max-width: 20rem; background-color: #1a4d2e;">
+                <div class="card-header" style="background-color:white; color:black">
+                    <div class="row">
+                        <div class="col-auto">
+                            <img th:src="${Profile.logo}" width=80 height=80/>
+                        </div>
+                        <div class="col">
+                            <h3 th:text="${Quote.symbol}"></h3>
+                            <h6 style="margin-top:-10px;"  th:text="${Quote.description}"></h6>
+                        </div>
+                    </div>                    
 
+                    <a th:href="@{${Profile.weburl}}"/><span th:text=${Profile.weburl}></span></a>
+                    <br>
+                    <a th:href="@{/addToWatch2}"> ADD TO WATCHLIST </a>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        <h4 align="center" th:text="${Quote.lastPrice}"></h4>
+                        <h4 align="center" style="margin-top:-10px;" th:text="${Quote.netChange}"></h4>
+                        <span th:text="${'Volume: ' + Quote.totalVolume}"/>
+                    </p>
+                    <p class="card-text">
+                        <span th:text="${'Industry: ' + Profile.Industry}"/>
+                        <br>
+                        <span th:text="${'IPO Date: ' + Profile.ipoDate}"/>
+                        <br>
+                        <span th:text="${'Market Cap (m): ' + #numbers.formatDecimal(Profile.marketCapitalization,1,'COMMA',2,'DEFAULT')}"/>
+                        <br>
+                        <span th:text="${'Total Shares O/S (m): ' + Profile.shareOutstanding}"/>
+                        <br>        
+                        <span th:text="${'52 week High: ' + Quote.yearHigh}"/>
+                        <br>
+                        <span th:text="${'52 week Low: ' + Quote.yearLow}"/>
+                        <br>
+                        <span th:text="${'PE ratio: ' + #numbers.formatDecimal(Quote.peRatio,1,'COMMA',2,'DEFAULT') }"/>
+                    </p>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>

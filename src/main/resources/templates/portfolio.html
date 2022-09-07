@@ -26,7 +26,7 @@
 </head>
 <body>
 
-    <div class="container" style="background-color: black; color:#FAF3E3;">
+    <div class="container-fluid" style="background-color: black; color:#FAF3E3;">
         <div class="row mb-3">
             <div class="col">
                 <nav class="navbar navbar-expand-lg bg-light fixed-top">
@@ -70,13 +70,13 @@
                 <form th:action="@{/portfolio}">
                     <label for="username">Enter Username:</label>
                     <input id="username" type="text" th:field="${Portfolio.username}" placeholder="Enter Username" required/>
-                    <input type="submit" value="GET PORTFOLIO"/>
+                    <input style="background-color:#FF9F29" type="submit" value="GET PORTFOLIO"/>
                 </form>
             </div>  
         </div>
 
         <div class="row" id="usernameDisplay" th:if="${Portfolio.username!= null}">
-            <div class="col-fluid" style="background-color:#FF9F29">
+            <div class="col-fluid" style="color:#FF9F29;">
                 <h4><i class="bi bi-person-badge-fill"></i>
                     <span th:text="${'Displaying ' + Portfolio.username + '... ...'}"></span>
                 </h4>
@@ -91,7 +91,7 @@
                 <input type="date" th:field="${Portfolio.entryDate}" required>
                 <br>
                 <textarea rows="3" cols="50" th:field="${Portfolio.comments}" placeholder="Enter comments"/>
-                <input type="submit" value="ADD ENTRY"/>
+                <input style="background-color:#FF9F29" type="submit" value="ADD ENTRY"/>
             </form>
             <form th:unless="${Portfolio.editIndex>=88888}"  th:action="@{/editPortfolio}">
                 <input type="text" th:field="${Portfolio.ticker}" required placeholder="Pls Enter Ticker">
@@ -137,7 +137,7 @@
                     </td>
                     <td> <span th:text="${#numbers.formatDecimal(trade.PnL,1,'COMMA',2,'DEFAULT')}"></span> </td>
                     <td> <span th:text="${trade.lastPrice}"></span> </td> 
-                    <td><span th:text="${#dates.format(trade.entryDate, 'dd-MMM-yyyy')}"></span></td>
+                    <td><span th:text="${#dates.format(trade.entryDate, 'dd/MM/yyyy')}"></span></td>
                     <td><span th:text="${trade.entryPrice}"></span></td>
                     <td><span th:text="${trade.quantity}"></span></td>
                     <td><span th:text="${trade.comments}"></span></td>
@@ -198,10 +198,10 @@
                     </td>
                     <td> <span th:text="${#numbers.formatDecimal(pastTrade.PnL,1,'COMMA',2,'DEFAULT')}"></span> </td>
                         <!-- For editing trades -->
-                    <td th:if="${!pastTrade.toClose}"><span th:text="${#dates.format(pastTrade.entryDate, 'dd-MMM-yyyy')}"></span></td>
+                    <td th:if="${!pastTrade.toClose}"><span th:text="${#dates.format(pastTrade.entryDate, 'dd/MM/yyyy')}"></span></td>
                     <td th:if="${!pastTrade.toClose}"><span th:text="${pastTrade.entryPrice}"></span></td>
                     <td th:if="${!pastTrade.toClose}"><span th:text="${pastTrade.quantity}"></span></td>
-                    <td th:if="${!pastTrade.toClose}"><span th:text="${#dates.format(pastTrade.closeDate, 'dd-MMM-yyyy')}"></span></td>
+                    <td th:if="${!pastTrade.toClose}"><span th:text="${#dates.format(pastTrade.closeDate, 'dd/MM/yyyy')}"></span></td>
                     <td th:if="${!pastTrade.toClose}"><span th:text="${pastTrade.closePrice}"></span></td>
                     <td th:if="${!pastTrade.toClose}"><span th:text="${pastTrade.comments}"></span></td>
                     <td th:if="${pastTrade.toClose}" colspan="7"> 

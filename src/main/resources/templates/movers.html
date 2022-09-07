@@ -49,26 +49,31 @@
             <div class="col mt-3">
                 <h1> Top Movers </h1>
                 <form>
-                    <select onchange="this.form.submit()" th:field="${Indices.indices}">
-                        <option selected value="$SPX.X">S&P 500</option>
-                        <option value="$COMPX">Nasdaq</option>
-                        <option value="$DJI">Dow Jones</option>
-                    </select>
+                    <div class="input-group">
+                        <label class="input-group-text" for="indexSelect" style="background-color:#ff9f29;"> Select Index </label>
+                        <select onchange="this.form.submit()" th:field="${Indices.indices}" id="indexSelect">
+                            <option selected value="$SPX.X">S&P 500</option>
+                            <option value="$COMPX">Nasdaq</option>
+                            <option value="$DJI">Dow Jones</option>
+                        </select>
+                    </div>
                 </form>
                 <hr>
             </div>
         </div>
         <div class="row">
             <div class="col">
-                <h4> SnP Gainers </h4>
+                <h4 th:if="${Indices.indices=='$SPX.X'}"> SnP Gainers </h4>
+                <h4 th:if="${Indices.indices=='$COMPX'}"> Nasdaq Gainers </h4>
+                <h4 th:if="${Indices.indices=='$DJI'}"> Dow Jones Gainers </h4>
                 <table id="movertable">
                     <tr>
-                        <th> <h4> Ticker </h4></th>
-                        <th> <h4> Description </h4></th>
-                        <th> <h4> % Change </h4> </th>
-                        <th> <h4> Last Done </h4> </th>
-                        <th><h4> Net Change </h4></th>
-                        <th><h4> Total Volume </h4></th>
+                        <th> <h5> Ticker </h5></th>
+                        <th> <h5> Description </h5></th>
+                        <th> <h5> % Change </h5> </th>
+                        <th> <h5> Last Done </h5> </th>
+                        <th><h5> Net Change </h5></th>
+                        <th><h5> Total Volume </h5></th>
                     </tr>
                     <tr th:each="mover: ${GainersList}">
                         <td th:text="${mover.symbol}"> </td>
@@ -82,16 +87,18 @@
             </div>
         </div>
         <div class="row">
-            <div class="col">
-                <h4> SnP Losers </h4>
+            <div class="col mt-3">
+                <h4 th:if="${Indices.indices=='$SPX.X'}"> SnP Losers </h4>
+                <h4 th:if="${Indices.indices=='$COMPX'}"> Nasdaq Losers </h4>
+                <h4 th:if="${Indices.indices=='$DJI'}"> Dow Jones Losers </h4>
                 <table id="movertable">
                     <tr>
-                        <th> <h4> Ticker </h4></th>
-                        <th> <h4> Description </h4></th>
-                        <th> <h4> % Change </h4> </th>
-                        <th> <h4> Last Done </h4> </th>
-                        <th><h4> Net Change </h4></th>
-                        <th><h4> Total Volume </h4></th>
+                        <th> <h5> Ticker </h5></th>
+                        <th> <h5> Description </h5></th>
+                        <th> <h5> % Change </h5> </th>
+                        <th> <h5> Last Done </h5> </th>
+                        <th><h5> Net Change </h5></th>
+                        <th><h5> Total Volume </h5></th>
                     </tr>
             
                     <tr th:each="mover: ${LosersList}">
