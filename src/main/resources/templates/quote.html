@@ -32,13 +32,16 @@
         </div>
     </nav>  
     <div class="container-fluid" style="background-color:black; color:#faf3e3">
-        <div class="row">
+        <div class="row"></div>
+        <div class="row ms-4 mt-3">
             <h1>  Ticker Search </h1>
         </div>
-        <div class="row">
+        <div class="row ms-4">
             <form th:action="@{/quote}">
-                <input type="text" name="ticker" placeholder="Enter ticker"/>
-                <input style="background-color:#ff9f29" type="submit" value="GET QUOTE" />
+                <div class="input-group">
+                    <input style="border:none;" type="text" name="ticker" placeholder="Enter ticker"/>
+                    <input style="background-color:#ff9f29; border:none;" type="submit" value="GET QUOTE" />
+                </div>
             </form>
         </div>
         <div class="row">
