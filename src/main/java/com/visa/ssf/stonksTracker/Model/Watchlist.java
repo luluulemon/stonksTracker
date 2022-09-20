@@ -12,8 +12,16 @@ public class Watchlist implements Serializable {
     private String listName;
     private List<String> watchList;
     private List<Quote> quotes;
+    private String sorting;
 
     private Map<String, List<String>> watchlists;
+
+    public String getSorting() {
+        return sorting;
+    }
+    public void setSorting(String sorting) {
+        this.sorting = sorting;
+    }
 
     public String getUsername() {
         return username;

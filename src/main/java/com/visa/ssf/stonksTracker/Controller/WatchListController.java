@@ -100,8 +100,8 @@ public class WatchListController {
         return "watchlist";
     }
 
-    @GetMapping("/addToWatch2")     // TO-DO -> fin up on add to watch on quote
-    public String addStock2(Model model){
+    @GetMapping("/addToWatch/{ticker}")     // TO-DO -> fin up on add to watch on quote
+    public String addStock2(@PathVariable String ticker, Model model){
         logger.info("Check for active Ticker >>> " + PriceController.currTicker);
         logger.info("Check for active user >>>> " + currUser);
         Watchlist watchlist = new Watchlist();
@@ -111,11 +111,33 @@ public class WatchListController {
             model.addAttribute("Watchlist", watchlist);
             return "watchlist";
         }
-
+        // check if currList alr contains ticker
+        watchlist.setUsername(currUser);    // Need this attribute for watchlist header
+        ticker = ticker.toUpperCase();  
+        Boolean containsTicker = false;
+        if(currList != null)     
+        {    if(currList.contains(ticker))
+            {   watchlist.setErrorMsg("Ticker alr in watchlist");     
+                containsTicker = true;                                  } 
+        }
+        if(!containsTicker)     // if List alr contain, skip this conditional
+        {    // check if ticker exists
+            Optional<Quote> opQuote = stonkService.getQuote(ticker);
+            if (!opQuote.isPresent())
+            {   watchlist.setErrorMsg("Ticker not available");  } 
+            else
+            {   logger.info("ticker " + ticker + " is available");  
+                watchlist = redisService.saveWatchList(ticker, currUser);
+                currList = watchlist.getWatchList();    // update currList, with new ticker listing
+            }
+        }
+        if(currList != null){   
+            Optional<List<Quote>> quotes = stonkService.getQuotesss(currList);
+            watchlist.setQuotes(quotes.get());
+        }
+        model.addAttribute("Watchlist", watchlist);
         return "watchlist";
     }
-
-
 
     @GetMapping("/remove/{symbol}")
     public String removeItem(@PathVariable String symbol, Model model){
@@ -124,7 +146,6 @@ public class WatchListController {
         boolean removed = currList.remove(symbol);  // currList updated, ticker removed
         logger.info("check remove >>>> " + symbol + "is removed: " + removed);
         watchlist.setWatchList(currList);
-
         // save to Redis
         redisService.removeSymbol(watchlist);       // saved updated list
         // display the quotesss
@@ -135,17 +156,31 @@ public class WatchListController {
         return "watchlist";
     }
 
+
 // watchlists --> Various Sorting
+    String currSort = "";
     @GetMapping("/sortTicker")
     public String sortTickerDown(Model model){
         Watchlist watchlist = new Watchlist();
         watchlist.setUsername(currUser);
         if(currList !=null && currList.size()!=0){
-            logger.info("Check if logic: I am in SortTicker");
-            Collections.sort(currList);     // update currList
-            redisService.saveSortedWatchlist(currUser, currList);   // save sorted list (send List+user)
-            Optional<List<Quote>> quotes = stonkService.getQuotesss(currList);
-            watchlist.setQuotes(quotes.get());          
+            if(currSort.equals("tickerUp")){
+                Collections.sort(currList, Collections.reverseOrder());
+                currSort = "tickerDown";
+                watchlist.setSorting(currSort);
+                redisService.saveSortedWatchlist(currUser, currList);   // save sorted list (send List+user)
+                Optional<List<Quote>> quotes = stonkService.getQuotesss(currList);
+                watchlist.setQuotes(quotes.get());  
+            }
+            else{
+                logger.info("Check sort " + currSort);
+                Collections.sort(currList);     // update currList
+                currSort = "tickerUp";
+                watchlist.setSorting(currSort);
+                redisService.saveSortedWatchlist(currUser, currList);   // save sorted list (send List+user)
+                Optional<List<Quote>> quotes = stonkService.getQuotesss(currList);
+                watchlist.setQuotes(quotes.get());    
+            }
         }
         model.addAttribute("Watchlist", watchlist);
             // if list empty, return username. Else, return username & quotes
@@ -157,15 +192,30 @@ public class WatchListController {
             Watchlist watchlist = new Watchlist();
             watchlist.setUsername(currUser);
             if(currList !=null && currList.size()!=0){
-               // List<Quote> sortedQuotes = new LinkedList<>();
                 List<Quote> quotes = stonkService.getQuotesss(currList).get();
+                if(currSort.equals("netUp"))
+                {   currSort = "netDown";       watchlist.setSorting("netDown");
             // TO-DO: check for empty optional    
-                for(int i=0; i<quotes.size(); i++){     // bubble sort NetChange (descending) 
-                    for(int j=1; j<quotes.size(); j++){
-                        if(quotes.get(j).getNetChange() > quotes.get(j-1).getNetChange()){
-                            Quote temp = quotes.get(j);
-                            quotes.set(j, quotes.get(j-1));
-                            quotes.set(j-1, temp);
+                    for(int i=0; i<quotes.size(); i++){     // bubble sort NetChange (descending) 
+                        for(int j=1; j<quotes.size(); j++){
+                            if(quotes.get(j).getNetChange() > quotes.get(j-1).getNetChange()){
+                                Quote temp = quotes.get(j);
+                                quotes.set(j, quotes.get(j-1));
+                                quotes.set(j-1, temp);
+                            }
+                        }
+                    }
+                }
+                else{
+                    currSort =  "netUp";
+                    watchlist.setSorting("netUp");
+                    for(int i=0; i<quotes.size(); i++){     // bubble sort NetChange (descending) 
+                        for(int j=1; j<quotes.size(); j++){
+                            if(quotes.get(j).getNetChange() < quotes.get(j-1).getNetChange()){
+                                Quote temp = quotes.get(j);
+                                quotes.set(j, quotes.get(j-1));
+                                quotes.set(j-1, temp);
+                            }
                         }
                     }
                 }
@@ -186,14 +236,33 @@ public class WatchListController {
             watchlist.setUsername(currUser);
             if(currList !=null && currList.size()!=0){
                 List<Quote> quotes = stonkService.getQuotesss(currList).get();
-            // TO-DO: check for empty optional    
-                for(int i=0; i<quotes.size(); i++){     // bubble sort NetChange (descending) 
-                    for(int j=1; j<quotes.size(); j++){
-                        if(quotes.get(j).getNetChange()/quotes.get(j).getLastPrice() > 
-                            quotes.get(j-1).getNetChange()/quotes.get(j-1).getLastPrice()){
-                            Quote temp = quotes.get(j);
-                            quotes.set(j, quotes.get(j-1));
-                            quotes.set(j-1, temp);
+                if(currSort.equals("percentUp"))
+                {   currSort = "percentDown";
+                    watchlist.setSorting(currSort);
+                // TO-DO: check for empty optional    
+                    for(int i=0; i<quotes.size(); i++){     // bubble sort NetChange (descending) 
+                        for(int j=1; j<quotes.size(); j++){
+                            if(quotes.get(j).getNetChange()/quotes.get(j).getLastPrice() > 
+                                quotes.get(j-1).getNetChange()/quotes.get(j-1).getLastPrice()){
+                                Quote temp = quotes.get(j);
+                                quotes.set(j, quotes.get(j-1));
+                                quotes.set(j-1, temp);
+                            }
+                        }
+                    }
+                }
+                else
+                {   currSort = "percentUp";
+                    watchlist.setSorting(currSort);
+                // TO-DO: check for empty optional    
+                    for(int i=0; i<quotes.size(); i++){     // bubble sort NetChange (descending) 
+                        for(int j=1; j<quotes.size(); j++){
+                            if(quotes.get(j).getNetChange()/quotes.get(j).getLastPrice() < 
+                                quotes.get(j-1).getNetChange()/quotes.get(j-1).getLastPrice()){
+                                Quote temp = quotes.get(j);
+                                quotes.set(j, quotes.get(j-1));
+                                quotes.set(j-1, temp);
+                            }
                         }
                     }
                 }
@@ -310,8 +379,9 @@ public class WatchListController {
         // In case in the middle of close, reset (undo Boolean and index)
         if(currPortfolioObj.getEditIndex()>=1000000)    
         {   currPortfolioObj.getPortfolio().get(currPortfolioObj.getEditIndex()-1000000).setToClose(false);  }                                            
-        // In case in the midst of Transaction edit, reset it
-        for(Quote q:currPortfolioObj.getPastTransactions()){    q.setToClose(false);    }
+        // In case in the midst of Transaction edit, reset it (if past transactions is not null)
+        if(currPortfolioObj.getPastTransactions()!=null)
+        {   for(Quote q:currPortfolioObj.getPastTransactions()){    q.setToClose(false);    }   }
 
         Portfolio portfolio = new Portfolio();  // new Obj to dump into view, dun want edit values with currObj
         currPortfolioObj.setEditIndex(index);   
@@ -386,7 +456,8 @@ public class WatchListController {
             return "portfolio";                                         }
  
         // Reset any edits in progress
-        for(Quote q: currPortfolioObj.getPastTransactions()){   q.setToClose(false);    }
+        if(currPortfolioObj.getPastTransactions()!=null)
+        {   for(Quote q: currPortfolioObj.getPastTransactions()){   q.setToClose(false);    }   }
         currPortfolioObj.setEditIndex(1000000+index);    // Set Index for midst of Close, reset any edit Portfolio 
         currPortfolioObj.getPortfolio().get(index).setToClose(true);  // updated currPortfolio with close Boolean
             

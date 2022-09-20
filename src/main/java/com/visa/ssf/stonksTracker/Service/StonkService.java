@@ -146,14 +146,13 @@ public class StonkService {
             JsonReader reader = Json.createReader(is);
             JsonObject data = reader.readObject();
             for(String ticker:tickers){
-            JsonObject quotedata = data.getJsonObject(ticker);
-            
-                if(quotedata == null)   // if endpoint does not work
-                {   return Optional.empty();    }
+                JsonObject quotedata = data.getJsonObject(ticker);
+                    if(quotedata == null)   // if endpoint does not work
+                    {   return Optional.empty();    }
 
-            ObjectMapper mapper = new ObjectMapper();
-            Quote quote = mapper.readValue(quotedata.toString(), Quote.class);
-            quotes.add(quote);
+                ObjectMapper mapper = new ObjectMapper();
+                Quote quote = mapper.readValue(quotedata.toString(), Quote.class);
+                quotes.add(quote);
             }   
             return Optional.of(quotes);
         }

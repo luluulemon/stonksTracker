@@ -60,6 +60,13 @@ public class RedisService {
         redistemplate.opsForValue().set(user, watchlist);
     }
 
+    public Watchlist checkWatchList(String username){
+        String user = username + "miniProjectWatchlist";
+        if(!redistemplate.hasKey(user))
+            return null;
+        Watchlist watchlist = (Watchlist) redistemplate.opsForValue().get(user);
+        return watchlist;
+    }
 
     public Watchlist getWatchList(Watchlist watchlist){
         String user = watchlist.getUsername() + "miniProjectWatchlist";
@@ -76,6 +83,14 @@ public class RedisService {
         return watchlist;
     }
 
+
+    public Portfolio checkPortfolio(String username){
+        String user = username + "miniProjectPortfolio";
+        if(!redistemplate.hasKey(user))
+            return null;
+        Portfolio portfolio = (Portfolio) redistemplate.opsForValue().get(user);
+        return portfolio;
+    }
 
     public Portfolio getPortfolio(Portfolio portfolio){     // getting username
         String user = portfolio.getUsername() + "miniProjectPortfolio";
