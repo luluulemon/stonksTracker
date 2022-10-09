@@ -50,7 +50,7 @@
                 <h3 th:text="${Quote.description}"></h3>   
             </div>
         </div>
-        <div class="row" th:if="${Quote.symbol!=null}">
+        <div class="row" th:if="${Quote.symbol!=null}">             <!-- Start of Card -->
             <div class="card m-5" style="max-width: 20rem; background-color: #1a4d2e;">
                 <div class="card-header" style="background-color:white; color:black">
                     <div class="row">
@@ -58,9 +58,10 @@
                             <img th:src="${Profile.logo}" width=80 height=80/>
                         </div>
                         <div class="col">
-                            <h3><span th:text="${Quote.symbol}"></span>
-                            <a th:href="@{${'/addToWatch/' + Quote.symbol}}"><i class="bi bi-star"></i></a>
-                            </h3>
+                            <div style="display:flex; justify-content:space-between;">
+                                <span style="font-size:30px; font-weight:bold"  th:text="${Quote.symbol}"></span>
+                                <a style="font-size:x-large;" th:href="@{${'/addToWatch/' + Quote.symbol}}"><i class="bi bi-star"></i></a>
+                            </div>
                             <h6 style="margin-top:-10px;"  th:text="${Quote.description}"></h6>
                         </div>
                     </div>                    
@@ -72,8 +73,10 @@
                 <div class="card-body">
                     <p class="card-text">
                         <h4 align="center" th:text="${'Last Done: ' + Quote.lastPrice}"></h4>
-                        <h4 align="center" style="margin-top:-10px;" th:text="${Quote.netChange}"></h4>
-                        <span th:text="${'Volume: ' + Quote.totalVolume}"/>
+                        <h4 align="center" style="margin-top:-10px;" th:text="${'Change: ' + Quote.netChange}"></h4>
+                        <div align="center">
+                            <span th:text="${'Volume: ' + #numbers.formatDecimal(Quote.totalVolume,1,'COMMA',2,'DEFAULT') }"/>
+                        </div>
                     </p>
                     <p class="card-text">
                         <span th:text="${'Industry: ' + Profile.Industry}"/>

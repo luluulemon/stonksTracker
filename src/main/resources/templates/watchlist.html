@@ -49,7 +49,7 @@
 
     <div class="container-fluid" style="background-color:black; color:#faf3e3;">
         <div class="row mt-5"> </div>   <!-- Start of CONTENT -- START OF CONTENT  -->
-        <div class="row mt-3">
+        <div class="row mt-3 mb-3">
             <div class="col">
                 <h2> My watchlist </h2>
             </div>
@@ -74,15 +74,20 @@
                 </div>
             </div>
         </div>
-        <div class="row mt-1" th:if="${Watchlist.username!=null}">
+        <div class="row mt-3" th:if="${Watchlist.username!=null}">
             <form th:action="@{/addToWatch}">
-                <div class="input-group">
+                <div class="input-group mb-3">
                     <input style="border:none;" type="text" th:field="${Watchlist.ticker}" placeholder="Pls enter ticker" required/>
                     <input style="background-color:#FF9f29; border:none" type="submit" value="ADD TICKER"/>
                 </div>
             </form>
-            <div id="msg">
-                <h3 th:text="${Watchlist.ErrorMsg}"></h3>
+        </div>
+        <div class="row mt-3" id="msg" th:if="${Watchlist.errorMsg!=null}">
+            <div class="col-auto">
+                <div class="alert" style="background-color:#faf3e3; color:black">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span th:text="${Watchlist.ErrorMsg}"></span>
+                </div>
             </div>
         </div>
         <div class="class row">         <!-- WATCHLIST table -- Watchlist table -->

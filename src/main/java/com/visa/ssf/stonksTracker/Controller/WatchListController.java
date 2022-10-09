@@ -54,8 +54,9 @@ public class WatchListController {
             Optional<List<Quote>> quotes = stonkService.getQuotesss(watchlist.getWatchList());
             watchlist.setQuotes(quotes.get());                  
         }
+        if(currList==null){ watchlist.setErrorMsg("Empty List");    }
         
-        model.addAttribute("Watchlist", watchlist);
+                model.addAttribute("Watchlist", watchlist);
         return "watchlist";
     }
 
